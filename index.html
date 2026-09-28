@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Guru Terpadu</title>
+    
+    <!-- Font Inter (Mirip MiSans Xiaomi) & Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        /* Variabel Warna ala Xiaomi HyperOS Light Mode */
+        :root {
+            --xi-bg: #F4F6F9;
+            --xi-surface: #FFFFFF;
+            --xi-primary: #0A59F7; /* HyperOS Blue */
+            --xi-primary-hover: #0849CC;
+            --xi-accent: #FF6900; /* Xiaomi Orange Accent */
+            --xi-success: #00B578;
+            --xi-danger: #F93920;
+            --xi-text-main: #000000;
+            --xi-text-muted: #7A808C;
+            --xi-border: #E8ECEF;
+            --xi-input-bg: #F2F4F7;
+            --xi-radius-lg: 24px;
+            --xi-radius-md: 16px;
+            --xi-transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--xi-bg); 
+            color: var(--xi-text-main);
+            margin: 0; 
+            padding: 30px 15px; 
+            line-height: 1.6;
+        }
+
+        /* Animasi Pop-up Khas Xiaomi */
+        @keyframes xiaomiPop {
+            0% { opacity: 0; transform: scale(0.95) translateY(15px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .container { 
+            max-width: 750px; 
+            background: var(--xi-surface); 
+            padding: 32px; 
+            margin: auto; 
+            border-radius: var(--xi-radius-lg); 
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04); 
+            animation: xiaomiPop 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        h2 { text-align: center; color: var(--xi-text-main); font-weight: 800; margin-top: 0; margin-bottom: 24px; font-size: 26px; letter-spacing: -0.5px;}
+        h3 { color: var(--xi-text-main); font-weight: 700; margin-bottom: 16px; font-size: 18px; letter-spacing: -0.3px;}
+
+        /* Form Inputs Bergaya Xiaomi */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--xi-text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;}
+        input, select, textarea { 
+            width: 100%; 
+            padding: 16px; 
+            border: 2px solid transparent; 
+            border-radius: var(--xi-radius-md); 
+            background-color: var(--xi-input-bg);
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--xi-text-main);
+            transition: var(--xi-transition);
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none; 
+            background-color: var(--xi-surface);
+            border-color: var(--xi-primary); 
+            box-shadow: 0 4px 15px rgba(10, 89, 247, 0.15);
+        }
+        input[readonly] { background-color: #E6E9ED; color: var(--xi-text-muted); cursor: not-allowed;}
+
+        /* Tombol Animasi Hover Halus */
+        button { 
+            width: 100%; 
+            padding: 16px; 
+            background-color: var(--xi-primary); 
+            color: white; 
+            border: none; 
+            border-radius: var(--xi-radius-md); 
+            font-size: 16px; 
+            font-weight: 700;
+            cursor: pointer; 
+            transition: var(--xi-transition); 
+        }
+        button:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(10, 89, 247, 0.25);
+        }
+        button:active { transform: scale(0.97); box-shadow: none; }
+        
+        .btn-success { background-color: var(--xi-success); }
+        .btn-success:hover { background-color: #009E69; box-shadow: 0 8px 20px rgba(0, 181, 120, 0.25); }
+        .btn-danger { background-color: var(--xi-danger); }
+        .btn-danger:hover { box-shadow: 0 8px 20px rgba(249, 57, 32, 0.25); }
+        
+        .btn-hapus { background-color: #FFECEA; color: var(--xi-danger); padding: 8px 16px; border-radius: 12px; font-size: 13px; width: auto; margin:0; box-shadow: none; font-weight: 700; }
+        .btn-hapus:hover { background-color: var(--xi-danger); color: white; transform: translateY(-2px); }
+        
+        .btn-logout { background-color: var(--xi-input-bg); color: var(--xi-text-main); width: auto; padding: 12px 20px; font-weight: 600; margin-left: auto; border-radius: 20px; box-shadow: none; }
+        .btn-logout:hover { background-color: #E2E6EC; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+
+        /* Tab Menu ala Xiaomi Control Center */
+        .tab-menu { 
+            display: none; 
+            background-color: var(--xi-surface); 
+            border-radius: var(--xi-radius-lg); 
+            padding: 8px; 
+            gap: 8px; 
+            margin-bottom: 24px; 
+            align-items: center; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            max-width: 750px;
+        }
+        .tab-menu button { 
+            background-color: transparent; 
+            color: var(--xi-text-muted); 
+            font-size: 14px; 
+            padding: 12px; 
+            border-radius: var(--xi-radius-md); 
+            box-shadow: none; 
+            flex: 1; 
+            text-align: center;
+        }
+        .tab-menu button:hover { background-color: var(--xi-input-bg); transform: none; }
+        .tab-menu button.active { 
+            background-color: var(--xi-primary); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(10, 89, 247, 0.3); 
+        }
+        .tab-menu .btn-logout { flex: none; background: transparent; color: var(--xi-danger);}
+        .tab-menu .btn-logout:hover { background: #FFECEA; }
+
+        /* Modern Tables */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; font-size: 14px; border-radius: var(--xi-radius-md); overflow: hidden; }
+        th, td { padding: 16px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--xi-border); }
+        th { background-color: var(--xi-input-bg); color: var(--xi-text-muted); font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #FAFBFC; }
+
+        .predikat-box { padding: 18px; color: white; font-weight: 800; text-align: center; border-radius: var(--xi-radius-md); margin: 15px 0; font-size: 18px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); letter-spacing: 0.5px;}
+        .note-eval { font-size: 12px; color: var(--xi-text-muted); text-align: center; margin-bottom: 24px; font-style: normal; font-weight: 500;}
+        
+        .filter-box { background-color: var(--xi-input-bg); padding: 24px; border-radius: var(--xi-radius-md); margin-bottom: 24px; border: none; }
+        .flex-row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .flex-row .form-group { flex: 1; min-width: 150px; }
+
+        /* Sections */
+        #loginSection, #formSection, #rekapSection, #historySection { display: none; }
+        #loginSection { display: block; max-width: 420px; margin-top: 8vh; } 
+        #laporanCetak { padding: 32px; border: 1px solid var(--xi-border); background: white; display: none; border-radius: var(--xi-radius-lg); }
+        
+        .tabel-detail th { background-color: var(--xi-input-bg); font-size: 13px; }
+
+        /* Ikon Game Turbo di Login */
+        .xi-avatar {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, var(--xi-accent), #FF9500);
+            border-radius: 24px; /* Squircle */
+            margin: 0 auto 24px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 40px;
+            box-shadow: 0 8px 24px rgba(255, 105, 0, 0.3);
+            transform: rotate(-10deg);
+        }
+
+        /* Toggle Mata Flat menggunakan Material Symbols */
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper input { padding-right: 48px; } 
+        .toggle-password { 
+            position: absolute; right: 12px; cursor: pointer; color: var(--xi-text-muted); 
+            user-select: none; font-size: 22px; padding: 6px; border-radius: 50%;
+            transition: var(--xi-transition);
+        }
+        .toggle-password:hover { background-color: rgba(0,0,0,0.06); color: var(--xi-text-main);}
+        
+        .uang-kanan { text-align: right; font-family: 'SF Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600;}
+
+        ul { line-height: 1.8; color: var(--xi-text-main); }
+        
+        /* Copyright Footer */
+        .copyright {
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 20px;
+            font-size: 13px;
+            color: var(--xi-text-muted);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HALAMAN LOGIN -->
+<div class="container" id="loginSection">
+    <div class="xi-avatar">
+        <span class="material-symbols-outlined" style="font-size: 44px;">sports_esports</span>
+    </div>
+    <h2>Sistem Guru Terpadu</h2>
+    <p style="margin-top:-15px; margin-bottom: 24px; text-align: center; color: var(--xi-text-muted); font-weight: 500;">Masuk untuk mengelola akademik</p>
+    <form id="formLogin">
+        <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="Masukkan username" required></div>
+        <div class="form-group">
+            <label>Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Masukkan password" required>
+                <!-- Ikon Flat Material Design -->
+                <span class="toggle-password material-symbols-outlined" id="toggleIcon">visibility</span>
+            </div>
+        </div>
+        <button type="submit" style="margin-top: 10px;">Masuk ke Dashboard</button>
+        <p id="loginLoading" style="display:none; text-align:center; color: var(--xi-primary); font-weight: 600; margin-top: 16px;">Memverifikasi Akun...</p>
+    </form>
+</div>
+
+<!-- MENU TABS (HyperOS Style) -->
+<div class="container tab-menu" id="tabMenu">
+    <button id="btnTabForm" onclick="bukaTab('form')">Jurnal Mengajar</button>
+    <button id="btnTabHistory" onclick="bukaTab('history')">Riwayat & Log</button>
+    <button id="btnTabRekap" onclick="bukaTab('rekap')">Pusat Kinerja</button>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+</div>
+
+<!-- TAB 1: FORMULIR INPUT -->
+<div class="container" id="formSection">
+    <h2>Laporan Kehadiran & Jurnal</h2>
+    <form id="formKehadiran">
+        <div class="form-group"><label>Nama Guru</label><input type="text" id="namaGuru" readonly required></div>
+        <div class="flex-row">
+            <div class="form-group"><label>Tanggal Pelaksanaan</label><input type="date" id="tanggal" required></div>
+            <div class="form-group"><label>Kategori Laporan</label>
+                <select id="jenis" required>
+                    <option value="">-- Pilih Jenis Kategori --</option>
+                    <option value="Izin Sakit">Izin Sakit</option>
+                    <option value="Izin Pribadi">Izin Pribadi</option>
+                    <option value="Izin Dinas">Izin Dinas</option>
+                    <option value="Alfa (Tanpa Keterangan)">Alfa (Tanpa Keterangan)</option>
+                    <option value="Jam Tambahan">Jam Tambahan</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex-row">
+            <div class="form-group"><label id="labelJam" style="color: var(--xi-danger);">Alokasi Jam</label>
+                <input type="number" id="jam" min="1" placeholder="Contoh: 2" required>
+            </div>
+            <div class="form-group"><label>Kelas / Ruangan</label><input type="text" id="kelas" placeholder="Contoh: XII IPS 1" required></div>
+        </div>
+        <div class="form-group"><label>Keterangan Aktivitas Jurnal</label><textarea id="keterangan" rows="3" placeholder="Deskripsikan kegiatan mengajar atau alasan izin..." required></textarea></div>
+        <button type="submit" class="btn-success">Simpan & Kirim Laporan</button>
+    </form>
+</div>
+
+<!-- TAB 2: RIWAYAT & HAPUS -->
+<div class="container" id="historySection">
+    <h2>Riwayat Jurnal Aktif</h2>
+    <p style="color: var(--xi-text-muted); font-weight: 500;">Log aktivitas Anda akan tersimpan di sini. Hapus jika ada kesalahan entri.</p>
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr><th>Tgl. Input</th><th>Kategori</th><th>Durasi</th><th>Detail Keterangan</th><th>Opsi</th></tr>
+            </thead>
+            <tbody id="tabelRiwayat"><tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--xi-text-muted);">Memuat riwayat...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- TAB 3: REKAP KINERJA -->
+<div class="container" id="rekapSection">
+    <div class="filter-box">
+        <h3 style="margin-top: 0;">Sistem Analisis Laporan & Finansial</h3>
+        <div class="form-group">
+            <label>Target Beban Kerja Standar (Jam)</label>
+            <input type="number" id="inputBebanKerja" value="330" required>
+        </div>
+        <div class="flex-row">
+            <div class="form-group"><label>Periode Mulai</label><input type="date" id="tglAwal" required></div>
+            <div class="form-group"><label>Periode Selesai</label><input type="date" id="tglAkhir" required></div>
+        </div>
+        <button class="btn-success" onclick="generateRekap()" style="background-color: var(--xi-primary);">Generate Analisis Data</button>
+    </div>
+
+    <!-- AREA CETAK PDF -->
+    <div id="laporanCetak">
+        <button class="btn-danger" style="margin-bottom: 24px;" onclick="downloadPDF()" data-html2canvas-ignore>Simpan ke PDF</button>
+        
+        <h2 style="text-align: center; border-bottom: 2px dashed var(--xi-border); padding-bottom: 20px; margin-bottom: 24px;">LAPORAN KINERJA & FINANSIAL GURU</h2>
+        
+        <div style="background-color: var(--xi-bg); padding: 20px; border-radius: var(--xi-radius-md); margin-bottom: 20px;">
+            <p style="margin:0 0 8px 0;"><strong>Nama:</strong> <span id="namaRekap"></span></p>
+            <p style="margin:0;"><strong>Periode Evaluasi:</strong> <span id="periodeRekap"></span></p>
+        </div>
+        
+        <div id="predikatBox" class="predikat-box">Menghitung...</div>
+        <div class="note-eval"><span class="material-symbols-outlined" style="font-size:14px; vertical-align:text-bottom;">info</span> Penilaian keaktifan administratif mengecualikan Izin Sakit & Dinas.</div>
+
+        <!-- TABEL RINCIAN HONOR -->
+        <h3 style="margin-top: 30px;">Akumulasi Finansial & Honorarium (Rp 4.500/Jam)</h3>
+        <table>
+            <tr><th>Komponen Beban Kerja</th><th>Total Jam</th><th class="uang-kanan">Nominal</th></tr>
+            <tr>
+                <td>Target Beban Kerja Awal</td>
+                <td id="tabelBeban" style="font-weight: 600;"></td>
+                <td class="uang-kanan" id="uangSeharusnya"></td>
+            </tr>
+            <tr>
+                <td style="color: var(--xi-danger);">Potongan Jam (Sakit, Pribadi, Dinas, Alfa)</td>
+                <td id="tabelAbsenHonor" style="color: var(--xi-danger); font-weight: 600;"></td>
+                <td class="uang-kanan" id="uangPotongan" style="color: var(--xi-danger);"></td>
+            </tr>
+            <tr>
+                <td style="color: var(--xi-primary);">Tambahan Jam Mengajar Ekstra</td>
+                <td id="tabelTambahan" style="color: var(--xi-primary); font-weight: 600;"></td>
+                <td class="uang-kanan" id="uangTambahan" style="color: var(--xi-primary);"></td>
+            </tr>
+            <tr>
+                <td style="background:var(--xi-bg); font-weight: 700;">TOTAL HONOR BERSIH</td>
+                <td style="background:var(--xi-bg);"><strong id="jamHonorTxt" style="font-size:16px;"></strong></td>
+                <td style="background:var(--xi-bg);" class="uang-kanan"><strong id="uangDiterima" style="font-size:18px; color: var(--xi-success);"></strong></td>
+            </tr>
+        </table>
+
+        <!-- RINCIAN HARI & JAM -->
+        <h3 style="margin-top: 30px;">Rincian Log Ketidakhadiran & Ekstra</h3>
+        <ul style="background: var(--xi-bg); padding: 24px 24px 24px 40px; border-radius: var(--xi-radius-md);">
+            <li>Izin Sakit: <span id="rekSakit"></span> jam (<strong style="color:var(--xi-primary);" id="hariSakit"></strong> hari) - <em>Dimaafkan Evaluasi, Potong Honor</em></li>
+            <li>Izin Dinas: <span id="rekDinas"></span> jam (<strong style="color:var(--xi-primary);" id="hariDinas"></strong> hari) - <em>Dimaafkan Evaluasi, Potong Honor</em></li>
+            <li>Izin Pribadi: <span id="rekPribadi"></span> jam (<strong style="color:var(--xi-danger);" id="hariPribadi"></strong> hari) - <em>Potong Evaluasi & Honor</em></li>
+            <li>Alfa: <span id="rekAlfa"></span> jam (<strong style="color:var(--xi-danger);" id="hariAlfa"></strong> hari) - <em>Potong Evaluasi & Honor</em></li>
+            <li>Jam Tambahan: <span id="rekTambahan"></span> jam riil terbayar</li>
+        </ul>
+
+        <!-- EVALUASI KINERJA -->
+        <h3 style="margin-top: 30px; border-top: 1px solid var(--xi-border); padding-top: 24px;">Rangkuman Tindakan Administratif</h3>
+        <table style="background-color: var(--xi-surface); border: 2px solid var(--xi-input-bg);">
+            <tr>
+                <td style="width: 40%; font-weight: 600;">Pelanggaran Kehadiran (Pribadi & Alfa)</td>
+                <td><span id="evalTotalHari" style="font-weight: 800; color: var(--xi-danger); font-size: 18px;"></span> Hari</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Catatan Sistem</td>
+                <td id="evalCatatan"></td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Rekomendasi Tindak Lanjut</td>
+                <td id="evalRekomendasi" style="font-weight: 500; color: var(--xi-text-muted);"></td>
+            </tr>
+        </table>
+
+        <h3 style="margin-top: 30px; border-top: 1px solid var(--xi-border); padding-top: 24px;">Lampiran Detail Log Harian</h3>
+        <table class="tabel-detail">
+            <thead>
+                <tr><th>Tanggal</th><th>Jenis Laporan</th><th>Jumlah Jam</th><th>Keterangan / Jurnal</th></tr>
+            </thead>
+            <tbody id="tabelDetailRekap">
+                <tr><td colspan="4" style="text-align:center; padding:20px;">Menunggu Proses Data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer class="copyright">
+    Copyright &copy; 2026 Hanya Untuk Kalangan Pribadi
+</footer>
+
+<script>
+    // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzn2EDWAl4fM-PdbAK_rznW7NrBeS94dwZKlvCLuawC5SV1SRcPmfrck2i2CQReWnT2AA/exec'; 
+    let namaUserAktif = "";
+    let chartInstance = null;
+    const TARIF_PER_JAM = 4500;
+
+    // FUNGSI FORMAT RUPIAH
+    const formatRupiah = (angka) => {
+        return "Rp " + angka.toLocaleString('id-ID');
+    };
+
+    // TOGGLE SHOW/HIDE PASSWORD DENGAN IKON FLAT MATERIAL SYMBOLS
+    document.getElementById("toggleIcon").addEventListener("click", function () {
+        const passInput = document.getElementById("password");
+        if (passInput.type === "password") { 
+            passInput.type = "text"; 
+            this.innerText = "visibility_off"; 
+        } 
+        else { 
+            passInput.type = "password"; 
+            this.innerText = "visibility"; 
+        }
+    });
+
+    window.onload = function() {
+        const sesi = localStorage.getItem("sesiGuruAktif");
+        if (sesi) { masukKeSistem(sesi); }
+    };
+
+    function masukKeSistem(namaGuru) {
+        namaUserAktif = namaGuru;
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("tabMenu").style.display = "flex";
+        document.getElementById("namaGuru").value = namaUserAktif;
+        document.getElementById("namaRekap").innerText = namaUserAktif;
+        bukaTab('form');
+    }
+
+    function logout() {
+        if(confirm("Apakah Anda yakin ingin logout?")) { localStorage.removeItem("sesiGuruAktif"); location.reload(); }
+    }
+
+    document.getElementById("jenis").addEventListener("change", function() {
+        const jenis = this.value;
+        const labelJam = document.getElementById("labelJam");
+        if (jenis === "Jam Tambahan") { labelJam.innerText = "Jumlah Jam Tambahan:"; labelJam.style.color = "var(--xi-primary)"; }
+        else if (jenis !== "") { labelJam.innerText = "Jumlah Jam yang Ditinggalkan (Kosong):"; labelJam.style.color = "var(--xi-danger)"; }
+        else { labelJam.innerText = "Alokasi Jam:"; labelJam.style.color = "var(--xi-text-muted)"; }
+    });
+
+    function bukaTab(tab) {
+        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('historySection').style.display = 'none';
+        document.getElementById('rekapSection').style.display = 'none';
+        document.getElementById('btnTabForm').className = '';
+        document.getElementById('btnTabHistory').className = '';
+        document.getElementById('btnTabRekap').className = '';
+
+        if (tab === 'form') { document.getElementById('formSection').style.display = 'block'; document.getElementById('btnTabForm').className = 'active'; }
+        else if (tab === 'history') { document.getElementById('historySection').style.display = 'block'; document.getElementById('btnTabHistory').className = 'active'; loadHistory(); }
+        else if (tab === 'rekap') { document.getElementById('rekapSection').style.display = 'block'; document.getElementById('btnTabRekap').className = 'active'; }
+    }
+
+    document.getElementById("formLogin").addEventListener("submit", function(e) {
+        e.preventDefault();
+        document.getElementById("loginLoading").style.display = "block";
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: "login", username: document.getElementById("username").value, password: document.getElementById("password").value }) })
+        .then(res => res.json()).then(data => {
+            document.getElementById("loginLoading").style.display = "none";
+            if (data.status === "success") { localStorage.setItem("sesiGuruAktif", data.nama); masukKeSistem(data.nama); } 
+            else alert(data.message);
+        }).catch(() => alert("Terjadi kesalahan jaringan."));
+    });
+
+    document.getElementById("formKehadiran").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const payload = { action: "submit_log", nama: namaUserAktif, tanggal: document.getElementById("tanggal").value, jenis: document.getElementById("jenis").value, jam: document.getElementById("jam").value, kelas: document.getElementById("kelas").value, keterangan: document.getElementById("keterangan").value };
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(data => {
+            if (data.status === "success") { alert("Berhasil disimpan!"); document.getElementById("formKehadiran").reset(); document.getElementById("namaGuru").value = namaUserAktif; }
+        });
+    });
+
+    function loadHistory() {
+        const tbody = document.getElementById("tabelRiwayat");
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;">Memuat riwayat...</td></tr>';
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: "get_history", nama: namaUserAktif }) })
+        .then(res => res.json()).then(result => {
+            if (result.status === "success") {
+                tbody.innerHTML = '';
+                if (result.data.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;">Belum ada riwayat jurnal.</td></tr>';
+                else {
+                    result.data.forEach(item => {
+                        let tgl = new Date(item.tanggal).toLocaleDateString('id-ID');
+                        let badgeBg = (item.jenis === "Jam Tambahan") ? "#EAF2FF" : "#F2F4F7";
+                        let badgeCol = (item.jenis === "Jam Tambahan") ? "var(--xi-primary)" : "var(--xi-text-main)";
+                        tbody.innerHTML += `<tr><td>${tgl}</td><td><span style="background:${badgeBg}; color:${badgeCol}; padding:6px 12px; border-radius:8px; font-weight:600; font-size:12px;">${item.jenis}</span></td><td><strong style="color:${badgeCol};">${item.jam} Jam</strong></td><td>${item.keterangan}</td><td><button class="btn-hapus" onclick="hapusJurnal('${item.timestamp}')">Hapus</button></td></tr>`;
+                    });
+                }
+            }
+        });
+    }
+
+    function hapusJurnal(timestamp) {
+        if(confirm("Yakin ingin menghapus jurnal ini?")) {
+            fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: "delete_log", nama: namaUserAktif, timestamp: timestamp }) })
+            .then(res => res.json()).then(result => { alert(result.message); if(result.status === "success") loadHistory(); });
+        }
+    }
+
+    function generateRekap() {
+        const beban = parseFloat(document.getElementById("inputBebanKerja").value);
+        const tglAwal = document.getElementById("tglAwal").value;
+        const tglAkhir = document.getElementById("tglAkhir").value;
+        if(!beban || !tglAwal || !tglAkhir) { alert("Lengkapi filter!"); return; }
+
+        document.getElementById("laporanCetak").style.display = "block";
+        document.getElementById("periodeRekap").innerText = tglAwal + " s/d " + tglAkhir;
+
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: "get_rekap", nama: namaUserAktif, tglAwal: tglAwal, tglAkhir: tglAkhir }) })
+        .then(res => res.json()).then(res => {
+            if (res.status === "success") {
+                const data = res.data_rekap;
+                
+                // --- 1. LOGIKA KEAKTIFAN (PENILAIAN) ---
+                const absenEvaluasi = data.Pribadi + data.Alfa;
+                const jamAktifEvaluasi = beban - absenEvaluasi; 
+                let persenEvaluasi = ((jamAktifEvaluasi / beban) * 100).toFixed(1);
+                if (persenEvaluasi > 100) persenEvaluasi = 100;
+
+                // --- 2. LOGIKA HONORARIUM (FINANSIAL) ---
+                const absenHonor = data.Sakit + data.Pribadi + data.Dinas + data.Alfa;
+                const totalTambahan = data.Tambahan;
+                const jamKerjaRiil = beban - absenHonor + totalTambahan;
+
+                // Update text tabel Finansial
+                document.getElementById("tabelBeban").innerText = beban + " Jam";
+                document.getElementById("uangSeharusnya").innerText = formatRupiah(beban * TARIF_PER_JAM);
+                
+                document.getElementById("tabelAbsenHonor").innerText = absenHonor + " Jam";
+                document.getElementById("uangPotongan").innerText = "- " + formatRupiah(absenHonor * TARIF_PER_JAM);
+                
+                document.getElementById("tabelTambahan").innerText = totalTambahan + " Jam";
+                document.getElementById("uangTambahan").innerText = "+ " + formatRupiah(totalTambahan * TARIF_PER_JAM);
+                
+                document.getElementById("jamHonorTxt").innerText = jamKerjaRiil + " Jam Riil";
+                document.getElementById("uangDiterima").innerText = formatRupiah(jamKerjaRiil * TARIF_PER_JAM);
+
+                // --- 3. LOGIKA HITUNGAN HARI ---
+                let setHariSakit = new Set(); let setHariPribadi = new Set();
+                let setHariDinas = new Set(); let setHariAlfa = new Set();
+                const rincian = res.rincian_log;
+
+                rincian.forEach(item => {
+                    let tglHanyaStr = new Date(item.tanggal).toDateString(); 
+                    if (item.jenis === "Izin Sakit") setHariSakit.add(tglHanyaStr);
+                    else if (item.jenis === "Izin Pribadi") setHariPribadi.add(tglHanyaStr);
+                    else if (item.jenis === "Izin Dinas") setHariDinas.add(tglHanyaStr);
+                    else if (item.jenis === "Alfa (Tanpa Keterangan)") setHariAlfa.add(tglHanyaStr);
+                });
+
+                let totalHariPelanggaran = setHariPribadi.size + setHariAlfa.size;
+
+                document.getElementById("rekSakit").innerText = data.Sakit; document.getElementById("hariSakit").innerText = setHariSakit.size;
+                document.getElementById("rekPribadi").innerText = data.Pribadi; document.getElementById("hariPribadi").innerText = setHariPribadi.size;
+                document.getElementById("rekDinas").innerText = data.Dinas; document.getElementById("hariDinas").innerText = setHariDinas.size;
+                document.getElementById("rekAlfa").innerText = data.Alfa; document.getElementById("hariAlfa").innerText = setHariAlfa.size;
+                document.getElementById("rekTambahan").innerText = data.Tambahan;
+
+                // --- 4. PREDIKAT BERDASARKAN EVALUASI ADMINISTRATIF ---
+                let pred = ""; let warna = ""; let ket = "";
+                let catatanEval = ""; let rekomEval = "";
+
+                if (persenEvaluasi >= 90) { 
+                    pred = "PREDIKAT A"; warna = "linear-gradient(135deg, var(--xi-success), #009E69)"; ket = "Aktif Optimal"; 
+                    catatanEval = "Kinerja Administratif sangat baik. Kepatuhan kehadiran sangat tinggi di luar kendala kesehatan/dinas.";
+                    rekomEval = "Pertahankan dedikasi kepatuhan mengajar yang sudah sangat baik ini.";
+                }
+                else if (persenEvaluasi >= 80) { 
+                    pred = "PREDIKAT B"; warna = "linear-gradient(135deg, var(--xi-primary), var(--xi-primary-hover))"; ket = "Teguran Ringan"; 
+                    catatanEval = "Kinerja baik. Namun terdapat beberapa Izin Pribadi/Alfa yang memengaruhi kesinambungan belajar.";
+                    rekomEval = "Berupaya meminimalisir pengajuan izin non-darurat (Izin Pribadi) di periode berikutnya.";
+                }
+                else if (persenEvaluasi >= 70) { 
+                    pred = "PREDIKAT C"; warna = "linear-gradient(135deg, var(--xi-accent), #E65C00)"; ket = "Peringatan"; 
+                    catatanEval = `Akumulasi ketidakhadiran administratif mencapai ${totalHariPelanggaran} hari. Kondisi ini secara signifikan memengaruhi proses pembelajaran siswa.`;
+                    rekomEval = "MOHON UNTUK segera berkoordinasi dengan kurikulum guna menjadwalkan kelas pengganti dan menekan izin pribadi.";
+                }
+                else { 
+                    pred = "PREDIKAT D/E"; warna = "linear-gradient(135deg, var(--xi-danger), #D82F18)"; ket = "Tindakan Khusus"; 
+                    catatanEval = `Tingkat pelanggaran ketidakhadiran sangat tinggi (${totalHariPelanggaran} hari). Siswa terancam tertinggal materi esensial.`;
+                    rekomEval = "Pemanggilan langsung oleh Kepala Sekolah untuk evaluasi komitmen mengajar secara menyeluruh.";
+                }
+
+                const pBox = document.getElementById('predikatBox');
+                pBox.innerText = pred + " (" + ket + ") - Skor: " + persenEvaluasi + "%";
+                pBox.style.background = warna;
+
+                document.getElementById("evalTotalHari").innerText = totalHariPelanggaran;
+                document.getElementById("evalCatatan").innerText = catatanEval;
+                document.getElementById("evalRekomendasi").innerText = rekomEval;
+
+                // --- 5. TABEL LAMPIRAN DETAIL ---
+                const tbodyDetail = document.getElementById("tabelDetailRekap");
+                tbodyDetail.innerHTML = "";
+                if (rincian.length === 0) {
+                    tbodyDetail.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Tidak ada log harian tersimpan.</td></tr>';
+                } else {
+                    rincian.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+                    rincian.forEach(item => {
+                        let tglFormat = new Date(item.tanggal).toLocaleDateString('id-ID');
+                        let warnaJam = (item.jenis === "Jam Tambahan") ? "color: var(--xi-primary);" : "color: var(--xi-danger);";
+                        let tandaJam = (item.jenis === "Jam Tambahan") ? "+ " : "- ";
+                        
+                        let tagKhusus = (item.jenis === "Izin Sakit" || item.jenis === "Izin Dinas") ? " <br><small style='color:var(--xi-primary); font-weight:600;'>(Dimaafkan Evaluasi)</small>" : "";
+
+                        tbodyDetail.innerHTML += `<tr><td>${tglFormat}</td><td style="font-weight:600;">${item.jenis} ${tagKhusus}</td><td style="font-weight:800; font-size:14px; ${warnaJam}">${tandaJam}${item.jam} Jam</td><td>${item.keterangan}</td></tr>`;
+                    });
+                }
+            }
+        });
+    }
+
+    function downloadPDF() {
+        html2pdf().set({ margin: 0.5, filename: 'Laporan_Finansial_' + namaUserAktif + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(document.getElementById('laporanCetak')).save();
+    }
+</script>
+</body>
+</html>
